@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leiderschap bij de Accountant</title>
+
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink2: #4a4a4a;
+    --ink3: #888;
+    --paper: #f8f6f1;
+    --card: #ffffff;
+    --accent: #3d4fd4;
+    --accent-bg: #eef0fb;
+    --accent-text: #2a38a8;
+    --green: #1a7a4a;
+    --green-bg: #e6f5ed;
+    --amber: #8a5a00;
+    --amber-bg: #fef3dc;
+    --red: #9a2020;
+    --red-bg: #fdeaea;
+    --border: #e2ddd6;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    font-family: 'Georgia', serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ---- HOST VIEW ---- */
+  #host-view {
+    display: none;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .host-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .host-title-block h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+
+  .host-title-block p {
+    font-size: 1rem;
+    color: var(--ink2);
+    font-family: 'Helvetica Neue', sans-serif;
+    font-style: italic;
+  }
+
+  .qr-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+  }
+
+  #qrcode-container {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  #qrcode-container canvas, #qrcode-container img {
+    display: block;
+  }
+
+  .qr-label {
+    font-size: 12px;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    text-align: center;
+    max-width: 160px;
+    line-height: 1.4;
+  }
+
+  .url-bar {
+    font-size: 12px;
+    font-family: monospace;
+    background: #f0eee9;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--accent-text);
+    word-break: break-all;
+    max-width: 200px;
+    text-align: center;
+  }
+
+  /* Leaderboard */
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  #leaderboard {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .lb-empty {
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  .lb-entry {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+
+  .lb-entry:hover { transform: translateX(2px); }
+
+  .lb-rank {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink3);
+    min-width: 28px;
+    text-align: center;
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+
+  .lb-rank.gold { color: #c8900a; font-size: 1.3rem; }
+  .lb-rank.silver { color: #777; font-size: 1.2rem; }
+  .lb-rank.bronze { color: #9a5200; font-size: 1.15rem; }
+
+  .lb-info { flex: 1; min-width: 0; }
+
+  .lb-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    font-family: 'Helvetica Neue', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lb-style {
+    font-size: 12px;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .lb-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-text);
+    font-family: 'Helvetica Neue', sans-serif;
+    min-width: 52px;
+    text-align: right;
+  }
+
+  .lb-bar-wrap {
+    width: 80px;
+    height: 6px;
+    background: var(--accent-bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .lb-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.5s;
+  }
+
+  .host-controls {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 1.1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--card);
+    color: var(--ink2);
+  }
+
+  .btn:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-text); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { background: #2a38a8; color: white; border-color: #2a38a8; }
+
+  .btn-danger { color: var(--red); }
+  .btn-danger:hover { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+
+  .stat-bar {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-item { text-align: center; }
+
+  .stat-item .num {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-text);
+    font-family: 'Helvetica Neue', sans-serif;
+    line-height: 1;
+  }
+
+  .stat-item .lbl {
+    font-size: 11px;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  /* ---- PLAYER VIEW ---- */
+  #player-view {
+    display: none;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .player-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .player-header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-bottom: 0.5rem;
+  }
+
+  .player-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Name entry */
+  #screen-name {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+
+  #screen-name h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #screen-name p {
+    font-size: 0.9rem;
+    color: var(--ink2);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  #name-input {
+    width: 100%;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    color: var(--ink);
+    background: var(--paper);
+    transition: border-color 0.2s;
+  }
+
+  #name-input:focus { outline: none; border-color: var(--accent); background: white; }
+
+  .start-btn {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.85rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Helvetica Neue', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .start-btn:hover { background: #2a38a8; }
+  .start-btn:disabled { background: var(--ink3); cursor: not-allowed; }
+
+  /* Progress */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    white-space: nowrap;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .q-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    background: var(--accent-bg);
+    border-radius: 6px;
+    padding: 3px 10px;
+    margin-bottom: 0.75rem;
+  }
+
+  .q-card h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+  }
+
+  .q-card .situation {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--ink2);
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+
+  /* Choices */
+  .choice-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
+    font-family: 'Helvetica Neue', sans-serif;
+    color: var(--ink);
+    cursor: pointer;
+    line-height: 1.5;
+    transition: all 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--accent-text);
+    transform: translateX(2px);
+  }
+
+  .choice-btn.good { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .choice-btn.ok { background: var(--amber-bg); border-color: var(--amber); color: var(--amber); }
+  .choice-btn.bad { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .choice-btn:disabled { cursor: default; transform: none; }
+  .choice-btn.dimmed { opacity: 0.4; }
+
+  /* Feedback */
+  .feedback {
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin: 0.5rem 0;
+    font-size: 0.88rem;
+    font-family: 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+  }
+
+  .feedback.good { background: var(--green-bg); color: var(--green); border-left: 3px solid var(--green); }
+  .feedback.ok { background: var(--amber-bg); color: var(--amber); border-left: 3px solid var(--amber); }
+  .feedback.bad { background: var(--red-bg); color: var(--red); border-left: 3px solid var(--red); }
+
+  .next-btn {
+    width: 100%;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Helvetica Neue', sans-serif;
+    cursor: pointer;
+    margin-top: 0.75rem;
+    transition: background 0.15s;
+  }
+
+  .next-btn:hover { background: var(--accent); }
+
+  /* Result */
+  #screen-result { display: none; }
+
+  .result-hero {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .score-circle {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    background: var(--accent-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent-text);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin: 0 auto 1.25rem;
+  }
+
+  .result-hero h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+
+  .result-hero p {
+    font-size: 0.9rem;
+    color: var(--ink2);
+    font-family: 'Helvetica Neue', sans-serif;
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+  }
+
+  .style-pill {
+    display: inline-block;
+    font-size: 13px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 600;
+    background: var(--accent-bg);
+    color: var(--accent-text);
+    border-radius: 20px;
+    padding: 5px 14px;
+  }
+
+  .breakdown-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .breakdown-card h3 {
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-bottom: 0.75rem;
+  }
+
+  .bk-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+
+  .bk-row:last-child { border-bottom: none; }
+  .bk-label { color: var(--ink2); }
+  .bk-val-good { color: var(--green); font-weight: 600; }
+  .bk-val-ok { color: var(--amber); font-weight: 600; }
+  .bk-val-bad { color: var(--red); font-weight: 600; }
+
+  .saved-notice {
+    text-align: center;
+    font-size: 13px;
+    color: var(--green);
+    font-family: 'Helvetica Neue', sans-serif;
+    padding: 0.75rem;
+    background: var(--green-bg);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .play-again-btn {
+    width: 100%;
+    background: var(--paper);
+    color: var(--ink2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    font-family: 'Helvetica Neue', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .play-again-btn:hover { background: var(--accent-bg); color: var(--accent-text); border-color: var(--accent); }
+
+  /* ---- MODE SELECT ---- */
+  #mode-select {
+    max-width: 400px;
+    margin: 3rem auto;
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+
+  #mode-select h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.4rem;
+  }
+
+  #mode-select .sub {
+    color: var(--ink3);
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  .mode-cards {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .mode-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    box-shadow: var(--shadow);
+  }
+
+  .mode-card:hover {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    transform: translateY(-1px);
+  }
+
+  .mode-card .icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .mode-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-bottom: 0.3rem;
+  }
+
+  .mode-card p {
+    font-size: 0.85rem;
+    color: var(--ink2);
+    font-family: 'Helvetica Neue', sans-serif;
+    line-height: 1.5;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .host-header { flex-direction: column-reverse; align-items: center; }
+    .host-title-block { text-align: center; }
+    .stat-bar { justify-content: space-around; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MODE SELECT -->
+<div id="mode-select">
+  <p class="sub" style="letter-spacing:0.15em; text-transform:uppercase; font-size:11px; color:#aaa; margin-bottom:0.3rem; font-style:normal;">Accountantskantoor</p>
+  <h1>Leiderschap<br>bij de Accountant</h1>
+  <p class="sub">Kies hoe je wilt deelnemen</p>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="startHost()">
+      <div class="icon">📺</div>
+      <h3>Host — toon leaderboard</h3>
+      <p>Projecteer dit scherm. Deelnemers scannen de QR-code en spelen op hun eigen telefoon. Resultaten verschijnen live.</p>
+    </div>
+    <div class="mode-card" onclick="startPlayer()">
+      <div class="icon">🎮</div>
+      <h3>Speler — doe mee</h3>
+      <p>Vul je naam in en start de 5 scenario's uit de accountancy. Je score wordt bewaard in het leaderboard.</p>
+    </div>
+  </div>
+</div>
+
+<!-- HOST VIEW -->
+<div id="host-view">
+  <div class="host-header">
+    <div class="host-title-block">
+      <p style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#aaa; font-style:normal; font-family:'Helvetica Neue',sans-serif; margin-bottom:0.3rem;">Accountantskantoor</p>
+      <h1>Leiderschap<br>bij de Accountant</h1>
+      <p>Scan de QR en speel mee op je telefoon</p>
+    </div>
+    <div class="qr-block">
+      <div id="qrcode-container">
+        <div id="qrcode"></div>
+      </div>
+      <div id="url-display" class="url-bar" style="display:none;"></div>
+      <div class="qr-label" id="qr-label-text">Vul URL in om QR te maken</div>
+      <div id="url-setup" style="margin-top:0.5rem; text-align:center;">
+        <div style="font-size:11px; color:#aaa; font-family:Helvetica Neue,sans-serif; margin-bottom:6px;">URL waarmee deelnemers<br>dit bestand bereiken:</div>
+        <input id="custom-url-input" type="text" placeholder="https://jouwsite.nl/spel.html" value="https://zipporababb-afk.github.io/Leiderschap-TAH/" style="width:190px; font-size:11px; font-family:monospace; border:1px solid #e2ddd6; border-radius:6px; padding:5px 8px; color:#1a1a1a; background:#f8f6f1;" />
+        <br><button onclick="applyCustomUrl()" style="margin-top:6px; font-size:12px; font-family:Helvetica Neue,sans-serif; font-weight:600; background:#3d4fd4; color:white; border:none; border-radius:6px; padding:5px 14px; cursor:pointer;">QR genereren</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-bar">
+    <div class="stat-item">
+      <div class="num" id="stat-count">0</div>
+      <div class="lbl">Deelnemers</div>
+    </div>
+    <div class="stat-item">
+      <div class="num" id="stat-avg">—</div>
+      <div class="lbl">Gem. score</div>
+    </div>
+    <div class="stat-item">
+      <div class="num" id="stat-top">—</div>
+      <div class="lbl">Topscore</div>
+    </div>
+  </div>
+
+  <div class="section-title">Ranglijst</div>
+  <div id="leaderboard"></div>
+
+  <div class="host-controls">
+    <button class="btn btn-primary" onclick="refreshLeaderboard()">↻ Vernieuwen</button>
+    <button class="btn" onclick="location.reload()">← Terug</button>
+    <button class="btn btn-danger" onclick="clearScores()">Wis alle scores</button>
+  </div>
+</div>
+
+<!-- PLAYER VIEW -->
+<div id="player-view">
+  <div class="player-header">
+    <div class="eyebrow">Accountantskantoor</div>
+    <h1>Leiderschap<br>bij de Accountant</h1>
+  </div>
+
+  <!-- Name screen -->
+  <div id="screen-name">
+    <h2>Wie ben jij?</h2>
+    <p>Vul je naam in om te beginnen. Je score verschijnt daarna op het leaderboard van de host.</p>
+    <input type="text" id="name-input" placeholder="Bijv. Anne, David, Priya…" maxlength="24" autocomplete="off" />
+    <button class="start-btn" id="start-btn" onclick="beginGame()" disabled>Start de uitdaging →</button>
+  </div>
+
+  <!-- Question screen -->
+  <div id="screen-question" style="display:none;">
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="p-fill"></div></div>
+      <div class="progress-label" id="p-label">1 / 5</div>
+    </div>
+    <div class="q-card">
+      <div class="q-tag" id="q-tag"></div>
+      <h2 id="q-title"></h2>
+      <p class="situation" id="q-situation"></p>
+    </div>
+    <div id="choices-wrap"></div>
+    <div id="feedback-wrap"></div>
+  </div>
+
+  <!-- Result screen -->
+  <div id="screen-result">
+    <div id="saved-notice" class="saved-notice" style="display:none;">✓ Score opgeslagen in het leaderboard</div>
+    <div class="result-hero">
+      <div class="score-circle" id="r-score"></div>
+      <h2 id="r-title"></h2>
+      <p id="r-desc"></p>
+      <div class="style-pill" id="r-style"></div>
+    </div>
+    <div class="breakdown-card">
+      <h3>Per scenario</h3>
+      <div id="r-breakdown"></div>
+    </div>
+    <button class="play-again-btn" onclick="resetPlayer()">Opnieuw spelen</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const STORAGE_KEY = 'ls_leaderboard_v1';
+
+const scenarios = [
+  {
+    title: "Druk van de cliënt",
+    tag: "Onafhankelijkheid & integriteit",
+    situation: "Je bent eindverantwoordelijk voor de jaarrekening-controle van een grote cliënt. De CFO belt je op en hint dat hij overweegt van kantoor te wisselen als je een kritische bevinding in je controleverklaring opneemt. Wat doe je?",
+    choices: [
+      { text: "Handhaaf je bevinding volledig — onafhankelijkheid is niet onderhandelbaar. Je legt de cliënt rustig uit waarom.", quality: "good", style: "Integer & standvastig", feedback: "Dit is de enige ethisch verantwoorde keuze. Onafhankelijkheid is de kern van het accountantsberoep. Druk van een cliënt mag nooit leiden tot een aangepaste verklaring." },
+      { text: "Overleg intern met de maatschap over de commerciële belangen voordat je beslist.", quality: "ok", style: "Procesgericht", feedback: "Intern overleg is begrijpelijk, maar mag nooit leiden tot aanpassing van een terechte bevinding. Het gesprek is zinvol als het jouw positie versterkt, niet als het een uitweg zoekt." },
+      { text: "Verzacht de bewoording van de bevinding zodat het minder opvalt.", quality: "bad", style: "Commercieel georiënteerd", feedback: "Dit is een ernstige schending van de NBA-gedragscode. Het ondermijnt de geloofwaardigheid van de verklaring en stelt het kantoor bloot aan tuchtrechtelijke risico's." },
+      { text: "Laat een collega de verklaring ondertekenen om het conflict te vermijden.", quality: "bad", style: "Verantwoordelijkheid ontwijkend", feedback: "Verantwoordelijkheid delegeren om cliëntdruk te ontlopen is niet integer. Het probleem verplaatst zich, het lost niets op." }
+    ]
+  },
+  {
+    title: "Fout in een afgegeven verklaring",
+    tag: "Kwaliteitsbeheersing",
+    situation: "Een junior accountant meldt je dat er een materiële fout zit in een controleverklaring die vorige maand is afgegeven. De jaarrekening is al gepubliceerd en de cliënt is tevreden. Hoe handel je?",
+    choices: [
+      { text: "Informeer direct de cliënt en het bestuur, trek de verklaring in en geef een gecorrigeerde versie af.", quality: "good", style: "Transparant & verantwoordelijk", feedback: "De enige juiste aanpak. Intrekking en heruitgifte zijn wettelijk vereist bij een materiële fout. Openheid beschermt alle partijen en behoudt vertrouwen op lange termijn." },
+      { text: "Analyseer eerst zorgvuldig of de fout werkelijk materieel is voordat je actie onderneemt.", quality: "ok", style: "Analytisch & voorzichtig", feedback: "Zorgvuldige analyse is verstandig — maar het mag geen vertragingstactiek zijn. Als materialiteit eenmaal vaststaat, moet actie snel volgen." },
+      { text: "Verwerk de correctie stilletjes in de volgende periodieke rapportage.", quality: "bad", style: "Risicomijdend & ondoorzichtig", feedback: "Dit is in strijd met verslaggevingsnormen. Stilzwijgende correctie misleidt gebruikers van de jaarrekening en vergroot het juridische en reputatierisico aanzienlijk." },
+      { text: "Niets doen — de fout is waarschijnlijk al door niemand opgemerkt.", quality: "bad", style: "Passief & onverantwoordelijk", feedback: "Bewuste inactiviteit bij een bekende materiële fout is onacceptabel en kan leiden tot tuchtrechtelijke en civielrechtelijke aansprakelijkheid." }
+    ]
+  },
+  {
+    title: "Onderpresterende senior",
+    tag: "Personeelsmanagement",
+    situation: "Je senior accountant Diederik levert al drie audits achter elkaar werk van onvoldoende kwaliteit op. De reviewprocessen kosten het team buitensporig veel extra tijd. Collega's beginnen te mopperen.",
+    choices: [
+      { text: "Plan een eerlijk individueel gesprek: bespreek concrete voorbeelden, stel meetbare verbeterdoelen en bied begeleiding aan.", quality: "good", style: "Coachend & resultaatgericht", feedback: "De juiste aanpak. Concrete feedback met een helder verbeterpad geeft Diederik een eerlijke kans én beschermt de kwaliteit van het team." },
+      { text: "Wijs Diederik voorlopig toe aan minder complexe dossiers om fouten te beperken.", quality: "ok", style: "Beschermend & pragmatisch", feedback: "Een tijdelijke maatregel kan zin hebben, maar zonder een eerlijk gesprek lost het het onderliggende probleem niet op en is het oneerlijk naar Diederik." },
+      { text: "Start direct een formeel PIP-traject via HR zonder voorafgaand informeel gesprek.", quality: "ok", style: "Procedureel", feedback: "Correct qua procedure, maar een informeel gesprek vooraf is menselijker en vaak effectiever. Een PIP als eerste stap kan de relatie onnodig beschadigen." },
+      { text: "Verdeel zijn werk stilletjes over de rest van het team en hoop dat het vanzelf goed komt.", quality: "bad", style: "Conflictvermijdend", feedback: "Dit is oneerlijk naar het team, lost niets op voor Diederik, en de kwaliteitsproblemen blijven bestaan. Leiderschap vraagt ook moeilijke gesprekken aan te gaan." }
+    ]
+  },
+  {
+    title: "Cliënt vraagt om een 'snelle' verklaring",
+    tag: "Tijdsdruk & kwaliteit",
+    situation: "Een vaste cliënt heeft dringend een accountantsverklaring nodig voor een financiering bij de bank — liefst binnen twee dagen. Jouw team heeft de werkzaamheden nog lang niet afgerond. De relatiebeheerder dringt aan.",
+    choices: [
+      { text: "Leg de cliënt uit dat een verklaring alleen kan worden afgegeven na volledige uitvoering van de vereiste werkzaamheden, en bespreek een realistische planning.", quality: "good", style: "Integer & helder", feedback: "De juiste lijn. Geen enkele commerciële druk rechtvaardigt een verklaring die niet op deugdelijk werk berust. Dit beschermt de cliënt, de bank én het kantoor." },
+      { text: "Schakel extra mensen in en werk het weekend door om de deadline te halen.", quality: "ok", style: "Oplossingsgericht", feedback: "Inzet is waardevol, maar alleen als de kwaliteit van de controle gegarandeerd blijft. Extra capaciteit mag nooit leiden tot het overslaan van essentiële controleslagen." },
+      { text: "Geef alvast een conceptverklaring af met de afspraak dat de definitieve versie later volgt.", quality: "bad", style: "Commercieel boven kwaliteit", feedback: "Een conceptverklaring voor financieringsdoeleinden is misleidend en juridisch risicovol. De bank mag er niet op vertrouwen als de werkzaamheden niet zijn afgerond." },
+      { text: "Delegeer de verklaring aan een junior die de dossiers niet kent om tijd te winnen.", quality: "bad", style: "Kwaliteit ondermijnend", feedback: "Iemand laten tekenen die het dossier niet kent is in strijd met alle beroepsnormen. Dit is een ernstig kwaliteits- en aansprakelijkheidsrisico." }
+    ]
+  },
+  {
+    title: "Fusie en onrust in het team",
+    tag: "Verandermanagement",
+    situation: "Jouw kantoor fuseert met een groter kantoor. Er ontstaat onrust: medewerkers vrezen verlies van cultuur, cliënten en banen. Het team kijkt naar jou. Het hogere management heeft nog geen officiële communicatie gestuurd.",
+    choices: [
+      { text: "Deel eerlijk wat je weet en wat je niet weet, erken de zorgen van het team en geef aan welke stappen je zelf zet om duidelijkheid te krijgen.", quality: "good", style: "Transparant & stabiliserend", feedback: "Precies wat leiderschap vraagt. Onzekerheid erkennen zonder te speculeren geeft het team houvast. Je positioneert jezelf als betrouwbaar aanspreekpunt." },
+      { text: "Wacht op de officiële communicatie van het management voordat je iets zegt.", quality: "ok", style: "Loyaal aan de organisatie", feedback: "Begrijpelijk, maar stilte kan worden uitgelegd als onverschilligheid of gebrek aan regie. Een kort gesprek om zorgen te erkennen is altijd mogelijk, ook zonder alle antwoorden." },
+      { text: "Verzeker het team dat alles goed komt en dat er niets zal veranderen.", quality: "bad", style: "Onecht geruststellend", feedback: "Valse geruststelling ondermijnt vertrouwen zodra de realiteit anders blijkt. Jouw team prikt hier doorheen en je geloofwaardigheid als leider daalt." },
+      { text: "Deel je eigen twijfels en frustraties openlijk met het team.", quality: "bad", style: "Emotioneel ongecontroleerd", feedback: "Echtheid is een kracht, maar leiders die hun eigen onzekerheid breed uitventen vergroten de angst in het team. Zoek voor je eigen frustraties een ander klankbord." }
+    ]
+  }
+];
+
+const Q = { good: 3, ok: 1, bad: 0 };
+
+// ============================================================
+// STORAGE
+// ============================================================
+function getScores() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+
+function saveScore(entry) {
+  let scores = getScores();
+  // Remove previous entry from same player (by name)
+  scores = scores.filter(s => s.name.toLowerCase() !== entry.name.toLowerCase());
+  scores.push(entry);
+  scores.sort((a, b) => b.pct - a.pct);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
+}
+
+function clearScores() {
+  if (confirm('Weet je zeker dat je alle scores wilt verwijderen?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    refreshLeaderboard();
+  }
+}
+
+// ============================================================
+// MODE SELECT
+// ============================================================
+function startHost() {
+  document.getElementById('mode-select').style.display = 'none';
+  document.getElementById('host-view').style.display = 'block';
+  generateQR();
+  refreshLeaderboard();
+  setInterval(refreshLeaderboard, 3000);
+}
+
+function startPlayer() {
+  document.getElementById('mode-select').style.display = 'none';
+  document.getElementById('player-view').style.display = 'block';
+}
+
+// ============================================================
+// QR CODE
+// ============================================================
+function generateQR() {
+  const url = window.location.href.split('?')[0];
+  if (url.startsWith('http')) {
+    buildQR(url);
+  }
+}
+
+function applyCustomUrl() {
+  let url = document.getElementById('custom-url-input').value.trim();
+  if (!url) return;
+  if (!url.startsWith('http')) url = 'https://' + url;
+  buildQR(url);
+}
+
+function buildQR(url) {
+  const urlBar = document.getElementById('url-display');
+  urlBar.textContent = url.replace(/^https?:\/\//, '');
+  urlBar.style.display = 'block';
+  document.getElementById('url-setup').style.display = 'none';
+  document.getElementById('qr-label-text').textContent = 'Scan om mee te spelen';
+
+  const container = document.getElementById('qrcode');
+  // Use quickchart.io QR API — works without CORS issues
+  const encoded = encodeURIComponent(url);
+  const img = new Image();
+  img.width = 180;
+  img.height = 180;
+  img.style.display = 'block';
+  img.style.borderRadius = '4px';
+  img.alt = 'QR code';
+  img.onerror = function() {
+    // fallback: show URL as text with manual scan instruction
+    container.innerHTML = '<div style="width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed #ccc;border-radius:8px;padding:12px;text-align:center;font-family:sans-serif;font-size:11px;color:#555;gap:8px;"><span style=\"font-size:24px;\">📱</span><span>Typ deze URL in je browser:</span><strong style=\"word-break:break-all;font-size:10px;color:#3d4fd4;\">' + url + '</strong></div>';
+  };
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encoded + '&format=png&ecc=M';
+  container.innerHTML = '';
+  container.appendChild(img);
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+function refreshLeaderboard() {
+  const scores = getScores();
+  const lb = document.getElementById('leaderboard');
+
+  // Stats
+  document.getElementById('stat-count').textContent = scores.length;
+  if (scores.length > 0) {
+    const avg = Math.round(scores.reduce((a, b) => a + b.pct, 0) / scores.length);
+    document.getElementById('stat-avg').textContent = avg + '%';
+    document.getElementById('stat-top').textContent = scores[0].pct + '%';
+  }
+
+  if (scores.length === 0) {
+    lb.innerHTML = '<div class="lb-empty">Nog geen deelnemers — scan de QR-code om te beginnen</div>';
+    return;
+  }
+
+  lb.innerHTML = '';
+  const medals = ['🥇', '🥈', '🥉'];
+
+  scores.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'lb-entry';
+
+    const rankClass = i < 3 ? ['gold', 'silver', 'bronze'][i] : '';
+    const rankText = i < 3 ? medals[i] : (i + 1);
+
+    div.innerHTML = `
+      <div class="lb-rank ${rankClass}">${rankText}</div>
+      <div class="lb-info">
+        <div class="lb-name">${escHtml(s.name)}</div>
+        <div class="lb-style">${escHtml(s.topStyle)}</div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+          <div class="lb-bar-wrap"><div class="lb-bar" style="width:${s.pct}%"></div></div>
+          <div class="lb-score">${s.pct}%</div>
+        </div>
+      </div>
+    `;
+    lb.appendChild(div);
+  });
+}
+
+// ============================================================
+// PLAYER GAME
+// ============================================================
+let playerName = '';
+let current = 0;
+let scores = [];
+let styles = [];
+let answered = false;
+
+document.getElementById('name-input').addEventListener('input', function() {
+  document.getElementById('start-btn').disabled = this.value.trim().length < 2;
+});
+
+document.getElementById('name-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && this.value.trim().length >= 2) beginGame();
+});
+
+function beginGame() {
+  playerName = document.getElementById('name-input').value.trim();
+  if (!playerName) return;
+  current = 0; scores = []; styles = []; answered = false;
+  document.getElementById('screen-name').style.display = 'none';
+  document.getElementById('screen-question').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = scenarios[current];
+  document.getElementById('p-fill').style.width = (current / scenarios.length * 100) + '%';
+  document.getElementById('p-label').textContent = (current + 1) + ' / ' + scenarios.length;
+  document.getElementById('q-tag').textContent = q.tag;
+  document.getElementById('q-title').textContent = q.title;
+  document.getElementById('q-situation').textContent = q.situation;
+  document.getElementById('feedback-wrap').innerHTML = '';
+
+  const wrap = document.getElementById('choices-wrap');
+  wrap.innerHTML = '';
+
+  const shuffled = [...q.choices].sort(() => Math.random() - 0.5);
+  shuffled.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.text;
+    btn.onclick = () => selectChoice(c, i, shuffled.length);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectChoice(chosen, idx, total) {
+  if (answered) return;
+  answered = true;
+  scores.push(Q[chosen.quality]);
+  styles.push(chosen.style);
+
+  const btns = document.querySelectorAll('#choices-wrap .choice-btn');
+  btns[idx].classList.add(chosen.quality);
+  btns.forEach((b, i) => {
+    if (i !== idx) b.classList.add('dimmed');
+    b.disabled = true;
+  });
+
+  const fb = document.createElement('div');
+  fb.className = 'feedback ' + chosen.quality;
+  fb.innerHTML = '<strong>' + escHtml(chosen.style) + '</strong> — ' + escHtml(chosen.feedback);
+  document.getElementById('feedback-wrap').appendChild(fb);
+
+  const nxt = document.createElement('button');
+  nxt.className = 'next-btn';
+  nxt.textContent = current < scenarios.length - 1 ? 'Volgende →' : 'Bekijk resultaat →';
+  nxt.onclick = () => { current++; if (current < scenarios.length) showQuestion(); else showResult(); };
+  document.getElementById('feedback-wrap').appendChild(nxt);
+}
+
+function showResult() {
+  document.getElementById('screen-question').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+  document.getElementById('p-fill').style.width = '100%';
+
+  const total = scores.reduce((a, b) => a + b, 0);
+  const pct = Math.round(total / (scenarios.length * 3) * 100);
+
+  let title, desc;
+  if (pct >= 80) {
+    title = 'Inspirerend vakleider';
+    desc = 'Je combineert professionele integriteit met menselijk leiderschap. Je team en cliënten vertrouwen op jouw oordeel — en terecht.';
+  } else if (pct >= 50) {
+    title = 'Ontwikkelend leider';
+    desc = 'Je hebt een goede basis, maar er zijn momenten waarop je de balans tussen commerciële druk en vakinhoudelijke integriteit nog scherper kunt trekken.';
+  } else {
+    title = 'Leider in groei';
+    desc = 'Leiderschap in de accountancy vraagt moed om ook onder druk de juiste keuze te maken. Bewustwording is de eerste stap naar verbetering.';
+  }
+
+  const freq = styles.reduce((a, s) => { a[s] = (a[s]||0)+1; return a; }, {});
+  const topStyle = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0][0];
+
+  document.getElementById('r-score').textContent = pct + '%';
+  document.getElementById('r-title').textContent = title;
+  document.getElementById('r-desc').textContent = desc;
+  document.getElementById('r-style').textContent = 'Dominante stijl: ' + topStyle;
+
+  const bd = document.getElementById('r-breakdown');
+  bd.innerHTML = '';
+  scenarios.forEach((q, i) => {
+    const cls = scores[i] === 3 ? 'good' : scores[i] === 1 ? 'ok' : 'bad';
+    const lbl = scores[i] === 3 ? '✓ Sterk' : scores[i] === 1 ? '~ Redelijk' : '✗ Aandacht';
+    const div = document.createElement('div');
+    div.className = 'bk-row';
+    div.innerHTML = `<span class="bk-label">${escHtml(q.title)}</span><span class="bk-val-${cls}">${lbl}</span>`;
+    bd.appendChild(div);
+  });
+
+  // Save to leaderboard
+  const entry = { name: playerName, pct, topStyle, ts: Date.now() };
+  saveScore(entry);
+  document.getElementById('saved-notice').style.display = 'block';
+}
+
+function resetPlayer() {
+  current = 0; scores = []; styles = []; answered = false;
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-question').style.display = 'none';
+  document.getElementById('name-input').value = '';
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('saved-notice').style.display = 'none';
+  document.getElementById('screen-name').style.display = 'block';
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-detect: if URL has ?player, go straight to player mode
+if (window.location.search.includes('player')) {
+  startPlayer();
+}
+</script>
+</body>
+</html>
